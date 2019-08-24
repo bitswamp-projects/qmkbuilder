@@ -49,6 +49,9 @@ class Keyboard {
 
 		this.selected = null;
 
+		this.pushWiring = false;
+		this.pullWiring = false;
+
 		// Bind methods.
 		this.importKLE = this.importKLE.bind(this);
 		this.updateWiring = this.updateWiring.bind(this);
@@ -64,6 +67,13 @@ class Keyboard {
 		this.serialize = this.serialize.bind(this);
 
 		this.deselect = this.deselect.bind(this);
+
+		this.togglePushWiring = this.togglePushWiring.bind(this);
+		this.togglePullWiring = this.togglePullWiring.bind(this);
+		this.changeRow = this.changeRow.bind(this);
+		this.changeCol = this.changeCol.bind(this);
+		this.push = this.push.bind(this);
+		this.pull = this.pull.bind(this);
 
 		// Import KLE if it exists.
 		if (json) this.importKLE(json);
@@ -492,6 +502,99 @@ class Keyboard {
 		return keyboard;
 	}
 
+	togglePushWiring() {
+		console.log('Toggling pushWiring from ' + this.pushWiring + ' to ' + !this.pushWiring);
+		this.pushWiring = !this.pushWiring;
+	}
+
+	togglePullWiring() {
+		console.log('Toggling pullWiring from ' + this.pullWiring + ' to ' + !this.pullWiring);
+		this.pullWiring = !this.pullWiring;
+	}
+
+	changeRow(selected, row) {
+		console.log('Changing row of selected key to ' + row);
+
+		var doPull = false;
+		var doPush = false;
+
+		if (row > selected.row && this.pushWiring) doPush = true;
+		if (row < selected.row && this.pullWiring) doPull = true;
+
+		if (doPush) this.push('row', selected, row);
+		selected.row = row;
+		if (doPull) this.pull('row', selected, row);
+	}
+
+	changeCol(selected, col) {
+		console.log('Changing col of selected key to ' + col);
+
+		var doPull = false;
+		var doPush = false;
+
+		if (col > selected.col && this.pushWiring) doPush = true;
+		if (col < selected.col && this.pullWiring) doPull = true;
+
+		if (doPush) this.push('col', selected, col);
+		selected.col = col;
+		if (doPull) this.pull('col', selected, col);
+	}
+
+	push(axis, selected, index) {
+		var targetRow;
+		var targetCol;
+		if (axis === 'row') {
+			targetCol = selected.col;
+			targetRow = index;
+			for (const key of this.keys) {
+				if (key.col === targetCol && key.row === targetRow) {
+					this.push(axis, key, key.row + 1)
+					console.log('Pushing key to row ' + (key.row + 1))
+					key.row += 1;
+					break;
+				}
+			}
+		} else if (axis === 'col') {
+			targetCol = index;
+			targetRow = selected.row;
+			for (const key of this.keys) {
+				if (key.col === targetCol && key.row === targetRow) {
+					this.push(axis, key, key.col + 1)
+					console.log('Pushing key to col ' + (key.col + 1))
+					key.col += 1;
+					break;
+				}
+			}
+		}
+	}
+
+	pull(axis, selected, index) {
+		var targetRow;
+		var targetCol;
+		if (axis === 'row') {
+			targetCol = selected.col;
+			targetRow = index + 2;
+			for (const key of this.keys) {
+				if (key.col === targetCol && key.row === targetRow) {
+					console.log('Pulling key to row ' + (key.row - 1))
+					key.row -= 1;
+					this.pull(axis, key, key.row)
+					break;
+				}
+			}
+		} else if (axis === 'col') {
+			targetCol = index + 2;
+			targetRow = selected.row;
+			for (const key of this.keys) {
+				if (key.col === targetCol && key.row === targetRow) {
+					console.log('Pulling key to col ' + (key.row - 1))
+					key.col -= 1;
+					this.pull(axis, key, key.col)
+					break;
+				}
+			}
+		}
+	}
 }
 
 module.exports = Keyboard;

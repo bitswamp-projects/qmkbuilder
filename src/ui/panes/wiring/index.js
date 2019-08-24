@@ -57,17 +57,39 @@ class Wiring extends React.Component {
 							min='0'
 							max={ keyboard.rows - 1 }
 							value={ selected.row }
-							onChange={ v => selected.row = v }/>
+							onChange={ v => keyboard.changeRow(selected, v) }/>
 						<div style={{ height: '0.5rem' }}/>
 						<h2 style={{ width: '4rem', marginRight: '0.5rem' }}>Column</h2>
-							<NumberBox
-								style={{ width: '3rem' }}
+						<NumberBox
+							style={{ width: '3rem' }}
 							minus='chevron-left'
 							plus='chevron-right'
 							min='0'
 							max={ keyboard.cols - 1 }
 							value={ selected.col }
-							onChange={ v => selected.col = v }/>
+							onChange={ v => keyboard.changeCol(selected, v) }/>
+							<label style={{ display: 'block' }}>
+								<input
+									type="checkbox"
+									id="cb_wiring_push"
+									name="cb_wiring_push"
+									defaultChecked={ keyboard.pushWiring }
+									onChange={ keyboard.togglePushWiring }
+									style={{ display: 'inline-block' }}
+								/>
+								Push adjacent pins on increase
+							</label>
+							<label style={{ display: 'block' }}>
+								<input
+									type="checkbox"
+									id="cb_wiring_push"
+									name="cb_wiring_push"
+									defaultChecked={ keyboard.pullWiring }
+									onChange={ keyboard.togglePullWiring }
+									style={{ display: 'inline-block' }}
+								/>
+								Pull adjacent pins on decrease
+							</label>
 					</div>;
 				} else {
 					return <h5>No key selected</h5>;
